@@ -1,0 +1,4 @@
+- hosts: grafana
+  tasks:
+  - name: Execute arquivo YAML
+    command: docker-compose up -d

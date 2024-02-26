@@ -1,0 +1,72 @@
+########### Configurações do agente. ############
+server:
+  log_level: debug
+
+metrics:
+  wal_directory: /tmp/agent
+  global:
+    scrape_interval: 60s
+    remote_write:
+    - url: dns/ip-para-onde-será-enviado-as-metricas.
+      tls_config:
+        insecure_skip_verify: true
+  configs:
+  - name: oracle
+    scrape_configs:
+    - job_name: oracle-EMPRESA-homolog
+      static_configs:
+      - targets: ['127.0.0.1:12345']
+
+    - job_name: Nome-Aplicação
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /path-aplicação/actuator/prometheus
+      static_configs:
+      - targets: ['ip-de-destino-da-maquina:8081']
+############# Metricas-de-log ################
+logs:
+  positions_directory: /tmp/positions/
+  configs:
+  - name: EMPRESA-homolog
+    clients:
+    - url: dns/ip-de-para-onde-será-enviado-as-metricas(LOG).
+      tls_config:
+        insecure_skip_verify: true
+    scrape_configs:
+    - job_name: logs-Empresa-homolog
+      static_configs:
+      - targets: [127.0.0.1]
+        labels:
+          job: EMPRESA-homolog
+          __path__: /host/root/var/log/messages
+traces:
+  configs:
+  - name: otlp
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+    remote_write:
+    - endpoint: dns/ip-de-para-onde-será-enviado-as-metricas(TRACE).
+      tls_config:
+        insecure_skip_verify: true
+    service_graphs:
+      enabled: true
+
+integrations:
+  node_exporter:
+    enabled: true
+    rootfs_path: /host/root
+    sysfs_path: /host/sys
+    procfs_path: /host/proc
+    set_collectors:
+    - uname
+    - cpu
+    - loadavg
+    - meminfo
+    - filesystem
+    - netdev
